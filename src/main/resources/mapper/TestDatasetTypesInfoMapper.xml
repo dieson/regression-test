@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ifchange.regressiontest.dao.TestDatasetTypesInfoMapper">
+    <resultMap id="BaseResultMap" type="com.ifchange.regressiontest.model.TestDatasetTypesInfo">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="desc" jdbcType="VARCHAR" property="desc"/>
+        <result column="default_service_address" jdbcType="VARCHAR" property="defaultServiceAddress"/>
+        <result column="created_by" jdbcType="VARCHAR" property="createdBy"/>
+        <result column="created_date" jdbcType="TIMESTAMP" property="createdDate"/>
+        <result column="updated_date" jdbcType="TIMESTAMP" property="updatedDate"/>
+
+        <collection property="testDatasetsInfoList" ofType="com.ifchange.regressiontest.model.TestDatasetsInfo">
+            <id column="set_id" jdbcType="INTEGER" property="id"/>
+            <result column="set_name" jdbcType="VARCHAR" property="name"/>
+            <result column="set_desc" jdbcType="VARCHAR" property="desc"/>
+            <result column="set_dataset_type_id" jdbcType="INTEGER" property="datasetTypeId"/>
+            <result column="set_test_case_count" jdbcType="INTEGER" property="testCaseCount"/>
+            <result column="set_created_by" jdbcType="VARCHAR" property="createdBy"/>
+            <result column="set_created_date" jdbcType="TIMESTAMP" property="createdDate"/>
+            <result column="set_updated_date" jdbcType="TIMESTAMP" property="updatedDate"/>
+        </collection>
+
+        <collection property="testDatasetUploadFormatTemplatesList" ofType="com.ifchange.regressiontest.model.TestDatasetUploadFormatTemplates">
+            <id column="format_template_id" jdbcType="INTEGER" property="id"/>
+            <result column="format_template_dataset_type_id" jdbcType="INTEGER" property="datasetTypeId"/>
+            <result column="format_template_request_colum_name" jdbcType="VARCHAR" property="requestColumName" />
+            <result column="format_template_request_colum_data_type" jdbcType="VARCHAR" property="requestColumDataType" />
+            <result column="format_template_response_colum_name" jdbcType="VARCHAR" property="responseColumName" />
+            <result column="format_template_response_colum_data_type" jdbcType="VARCHAR" property="responseColumDataType" />
+            <result column="format_template_created_date" jdbcType="TIMESTAMP" property="createdDate"/>
+            <result column="format_template_updated_date" jdbcType="TIMESTAMP" property="updatedDate"/>
+        </collection>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, name, `desc`, default_service_address, created_by, created_date, updated_date
+  </sql>
+
+    <select id="selectTypeAndFormatTemplateByTypeId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+      select
+      tdti.id, tdti.`name`, tdti.`desc`, tdti.default_service_address, tdti.created_by, tdti.created_date, tdti.updated_date,
+      tduft.id as format_template_id, tduft.dataset_type_id as format_template_dataset_type_id, tduft.request_colum_name as format_template_request_colum_name, tduft.request_colum_data_type as format_template_request_colum_data_type,tduft.response_colum_name as format_template_response_colum_name, tduft.response_colum_data_type as format_template_response_colum_data_type, tduft.created_date as format_template_created_date, tduft.updated_date as format_template_updated_date
+      from test_dataset_types_info tdti left join test_dataset_upload_format_templates tduft on tdti.id = tduft.dataset_type_id where tdti.id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <select id="selectTypeAndSetByTypeId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        tdti.id, tdti.`name`, tdti.`desc`, tdti.default_service_address, tdti.created_by, tdti.created_date, tdti.updated_date,
+        tdi.id as set_id, tdi.`name` as set_name, tdi.`desc` as set_desc, tdi.dataset_type_id as set_dataset_type_id, tdi.test_case_count as set_test_case_count, tdi.created_by as set_created_by, tdi.created_date as set_created_date, tdi.updated_date as set_updated_date
+          from test_dataset_types_info tdti left join test_datasets_info tdi on tdti.id = tdi.dataset_type_id where tdti.id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from test_dataset_types_info
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <select id="selectByName" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from test_dataset_types_info
+        where name = #{name,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from test_dataset_types_info
+    </select>
+
+    <select id="selectSelective" parameterType="com.ifchange.regressiontest.model.TestDatasetTypesInfo"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from test_dataset_types_info
+        <trim prefix="where" prefixOverrides="and|or">
+            <if test="id != null">
+                id = #{id,jdbcType=INTEGER}
+            </if>
+            <if test="name != null and name != ''">
+                and name = #{name,jdbcType=VARCHAR}
+            </if>
+            <if test="desc != null and desc != ''">
+                and `desc` = #{desc,jdbcType=VARCHAR}
+            </if>
+            <if test="defaultServiceAddress != null and defaultServiceAddress != ''">
+                and default_service_address = #{defaultServiceAddress,jdbcType=VARCHAR}
+            </if>
+            <if test="createdBy != null and createdBy != ''">
+                and created_by = #{createdBy,jdbcType=VARCHAR}
+            </if>
+            <if test="createdDate != null">
+                and created_date = #{createdDate,jdbcType=TIMESTAMP}
+            </if>
+            <if test="updatedDate != null">
+                and updated_date = #{updatedDate,jdbcType=TIMESTAMP}
+            </if>
+        </trim>
+    </select>
+
+    <select id="selectByPrimaryKeyList" parameterType="java.util.List" resultMap="BaseResultMap">
+        select * from test_dataset_types_info
+        where id in
+        <foreach collection="list" index="index" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from test_dataset_types_info
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+    <delete id="deleteByPrimaryKeyList" parameterType="java.util.List">
+        delete from test_dataset_types_info
+        where id in
+        <foreach collection="list" index="index" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <insert id="insert" parameterType="com.ifchange.regressiontest.model.TestDatasetTypesInfo">
+    insert into test_dataset_types_info (id, name, `desc`,
+      default_service_address, created_by, created_date)
+    values (#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{desc,jdbcType=VARCHAR}, 
+      #{defaultServiceAddress,jdbcType=VARCHAR}, #{createdBy,jdbcType=VARCHAR}, now()
+  </insert>
+    <insert id="insertSelective" parameterType="com.ifchange.regressiontest.model.TestDatasetTypesInfo">
+        insert into test_dataset_types_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="desc != null">
+                `desc`,
+            </if>
+            <if test="defaultServiceAddress != null">
+                default_service_address,
+            </if>
+            <if test="createdBy != null">
+                created_by,
+            </if>
+            created_date
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="desc != null">
+                #{desc,jdbcType=VARCHAR},
+            </if>
+            <if test="defaultServiceAddress != null">
+                #{defaultServiceAddress,jdbcType=VARCHAR},
+            </if>
+            <if test="createdBy != null">
+                #{createdBy,jdbcType=VARCHAR},
+            </if>
+            now()
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.ifchange.regressiontest.model.TestDatasetTypesInfo">
+        update test_dataset_types_info
+        <set>
+            <if test="name != null">
+                name = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="desc != null">
+                `desc` = #{desc,jdbcType=VARCHAR},
+            </if>
+            <if test="defaultServiceAddress != null">
+                default_service_address = #{defaultServiceAddress,jdbcType=VARCHAR},
+            </if>
+            <if test="createdBy != null">
+                created_by = #{createdBy,jdbcType=VARCHAR},
+            </if>
+            updated_date = now()
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.ifchange.regressiontest.model.TestDatasetTypesInfo">
+    update test_dataset_types_info
+    set name = #{name,jdbcType=VARCHAR},
+      `desc` = #{desc,jdbcType=VARCHAR},
+      default_service_address = #{defaultServiceAddress,jdbcType=VARCHAR},
+      created_by = #{createdBy,jdbcType=VARCHAR},
+      updated_date = now()
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

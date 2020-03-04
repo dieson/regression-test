@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ifchange.regressiontest.dao.TestcasesMapper">
+    <resultMap id="BaseResultMap" type="com.ifchange.regressiontest.model.Testcases">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="dataset_id" jdbcType="INTEGER" property="datasetId"/>
+        <result column="weight" jdbcType="DOUBLE" property="weight"/>
+        <result column="created_date" jdbcType="TIMESTAMP" property="createdDate"/>
+        <result column="updated_date" jdbcType="TIMESTAMP" property="updatedDate"/>
+    </resultMap>
+    <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.ifchange.regressiontest.model.Testcases">
+        <result column="data" jdbcType="LONGVARCHAR" property="data"/>
+        <result column="expect_data" jdbcType="LONGVARCHAR" property="expectData"/>
+    </resultMap>
+    <resultMap extends="ResultMapWithBLOBs" id="TestcasesWithSetInfo"
+               type="com.ifchange.regressiontest.model.Testcases">
+        <association property="testDatasetsInfo" column="dataset_id"
+                     javaType="com.ifchange.regressiontest.model.TestDatasetsInfo">
+            <id column="set_id" jdbcType="INTEGER" property="id"/>
+            <result column="set_name" jdbcType="VARCHAR" property="name"/>
+            <result column="set_desc" jdbcType="VARCHAR" property="desc"/>
+            <result column="set_dataset_type_id" jdbcType="INTEGER" property="datasetTypeId"/>
+            <result column="set_test_case_count" jdbcType="INTEGER" property="testCaseCount"/>
+            <result column="set_created_by" jdbcType="VARCHAR" property="createdBy"/>
+            <result column="set_created_date" jdbcType="TIMESTAMP" property="createdDate"/>
+            <result column="set_updated_date" jdbcType="TIMESTAMP" property="updatedDate"/>
+        </association>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+    id, dataset_id, weight, created_date, updated_date
+  </sql>
+    <sql id="Blob_Column_List">
+    data, expect_data
+  </sql>
+
+    <select id="selectAll" resultMap="ResultMapWithBLOBs">
+        select
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        from testcases
+    </select>
+
+    <select id="selectTestcaseAndSetInfoByCaseId" parameterType="java.lang.Integer" resultMap="TestcasesWithSetInfo">
+        select
+         tc.id, tc.dataset_id, tc.data, tc.expect_data, weight, tc.created_date, tc.updated_date,
+          tdi.id as set_id, tdi.`name` as set_name, tdi.`desc` as set_desc, tdi.dataset_type_id as set_dataset_type_id, tdi.test_case_count as set_test_case_count, tdi.created_by as set_created_by, tdi.created_date as set_created_date, tdi.updated_date as set_updated_date
+         from testcases tc left join test_datasets_info tdi on tc.dataset_id = tdi.id where tc.id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="TestcasesWithSetInfo">
+        select
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        from testcases
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <select id="selectBySetId" parameterType="java.lang.Integer" resultMap="TestcasesWithSetInfo">
+        select
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        from testcases
+        where dataset_id = #{setId,jdbcType=INTEGER}
+    </select>
+
+    <select id="selectByPrimaryKeyList" parameterType="java.util.List" resultMap="TestcasesWithSetInfo">
+        select
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        from testcases
+        where id in
+        <foreach collection="list" index="index" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="selectSelective" parameterType="com.ifchange.regressiontest.model.Testcases"
+            resultMap="TestcasesWithSetInfo">
+        select
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        from testcases
+        <trim prefix="where" prefixOverrides="and|or">
+            <if test="id != null">
+                and id = #{id,jdbcType=INTEGER}
+            </if>
+            <if test="datasetId != null">
+                and dataset_id = #{datasetId,jdbcType=INTEGER}
+            </if>
+            <if test="weight != null">
+                and weight = #{weight,jdbcType=DOUBLE}
+            </if>
+            <if test="createdDate != null">
+                and created_date = #{createdDate,jdbcType=TIMESTAMP}
+            </if>
+            <if test="updatedDate != null">
+                and updated_date = #{updatedDate,jdbcType=TIMESTAMP}
+            </if>
+            <if test="data != null">
+                and data = #{data,jdbcType=LONGVARCHAR}
+            </if>
+            <if test="expectData != null">
+                and expect_data = #{expectData,jdbcType=LONGVARCHAR}
+            </if>
+        </trim>
+    </select>
+
+    <select id="selectTestCaseAndSetSelective" parameterType="com.ifchange.regressiontest.model.Testcases"
+            resultMap="TestcasesWithSetInfo">
+        select
+        tc.id, tc.dataset_id, tc.data, tc.expect_data, weight, tc.created_date, tc.updated_date,
+        tdi.id as set_id, tdi.`name` as set_name, tdi.`desc` as set_desc, tdi.dataset_type_id as set_dataset_type_id,
+        tdi.test_case_count as set_test_case_count, tdi.created_by as set_created_by, tdi.created_date as
+        set_created_date, tdi.updated_date as set_updated_date
+        from testcases tc left join test_datasets_info tdi on tc.dataset_id = tdi.id
+        <trim prefix="where" prefixOverrides="and|or">
+            <if test="id != null">
+                and tc.id = #{id,jdbcType=INTEGER}
+            </if>
+            <if test="datasetId != null">
+                and tc.dataset_id = #{datasetId,jdbcType=INTEGER}
+            </if>
+            <if test="weight != null">
+                and tc.weight = #{weight,jdbcType=DOUBLE}
+            </if>
+            <if test="createdDate != null">
+                and tc.created_date = #{createdDate,jdbcType=TIMESTAMP}
+            </if>
+            <if test="updatedDate != null">
+                and tc.updated_date = #{updatedDate,jdbcType=TIMESTAMP}
+            </if>
+            <if test="data != null and data != ''">
+                and tc.data = #{data,jdbcType=LONGVARCHAR}
+            </if>
+            <if test="expectData != null and expectData != ''">
+                and tc.expect_data = #{expectData,jdbcType=LONGVARCHAR}
+            </if>
+        </trim>
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from testcases
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+    <delete id="deleteByPrimaryKeyList" parameterType="java.util.List">
+        delete from testcases
+        where id in
+        <foreach collection="list" index="index" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <insert id="insert" parameterType="com.ifchange.regressiontest.model.Testcases">
+    insert into testcases (id, dataset_id, weight,
+      created_date, data, expect_data
+      )
+    values (#{id,jdbcType=INTEGER}, #{datasetId,jdbcType=INTEGER}, #{weight,jdbcType=DOUBLE}, 
+      now(),  #{data,jdbcType=LONGVARCHAR}, #{expectData,jdbcType=LONGVARCHAR}
+      )
+  </insert>
+    <insert id="insertSelective" parameterType="com.ifchange.regressiontest.model.Testcases">
+        insert into testcases
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="datasetId != null">
+                dataset_id,
+            </if>
+            <if test="weight != null">
+                weight,
+            </if>
+            created_date,
+            <if test="data != null">
+                data,
+            </if>
+            <if test="expectData != null">
+                expect_data
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="datasetId != null">
+                #{datasetId,jdbcType=INTEGER},
+            </if>
+            <if test="weight != null">
+                #{weight,jdbcType=DOUBLE},
+            </if>
+            now(),
+            <if test="data != null">
+                #{data,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="expectData != null">
+                #{expectData,jdbcType=LONGVARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.ifchange.regressiontest.model.Testcases">
+        update testcases
+        <set>
+            <if test="datasetId != null">
+                dataset_id = #{datasetId,jdbcType=INTEGER},
+            </if>
+            <if test="weight != null">
+                weight = #{weight,jdbcType=DOUBLE},
+            </if>
+            updated_date = now(),
+            <if test="data != null">
+                data = #{data,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="expectData != null">
+                expect_data = #{expectData,jdbcType=LONGVARCHAR}
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.ifchange.regressiontest.model.Testcases">
+    update testcases
+    set dataset_id = #{datasetId,jdbcType=INTEGER},
+      weight = #{weight,jdbcType=DOUBLE},
+      updated_date = now(),
+      data = #{data,jdbcType=LONGVARCHAR}
+      expect_data = #{expectData,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+    <update id="updateByPrimaryKey" parameterType="com.ifchange.regressiontest.model.Testcases">
+    update testcases
+    set dataset_id = #{datasetId,jdbcType=INTEGER},
+      weight = #{weight,jdbcType=DOUBLE},
+      updated_date = now()
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

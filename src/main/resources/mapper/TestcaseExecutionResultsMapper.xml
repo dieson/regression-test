@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ifchange.regressiontest.dao.TestcaseExecutionResultsMapper">
+    <resultMap id="BaseResultMap" type="com.ifchange.regressiontest.model.TestcaseExecutionResults">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="test_execution_id" jdbcType="INTEGER" property="testExecutionId"/>
+        <result column="testcase_id" jdbcType="INTEGER" property="testcaseId"/>
+        <result column="execution_status" jdbcType="VARCHAR" property="executionStatus"/>
+        <result column="passed" jdbcType="BIT" property="passed"/>
+        <result column="correctness" jdbcType="VARCHAR" property="correctness"/>
+        <result column="correctness_score" jdbcType="DOUBLE" property="correctnessScore"/>
+        <result column="created_date" jdbcType="TIMESTAMP" property="createdDate"/>
+        <result column="updated_date" jdbcType="TIMESTAMP" property="updatedDate"/>
+    </resultMap>
+    <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs"
+               type="com.ifchange.regressiontest.model.TestcaseExecutionResults">
+        <result column="result_data" jdbcType="LONGVARCHAR" property="resultData"/>
+    </resultMap>
+
+    <resultMap id="ResultMapWithTestcase" type="com.ifchange.regressiontest.model.TestcaseExecutionResults"
+               extends="ResultMapWithBLOBs">
+        <association property="testcases" column="testcase_id"
+                     javaType="com.ifchange.regressiontest.model.Testcases">
+            <id column="testcase_id" jdbcType="INTEGER" property="id"/>
+            <result column="testcase_dataset_id" jdbcType="INTEGER" property="datasetId"/>
+            <result column="testcase_data" jdbcType="LONGVARCHAR" property="data"/>
+            <result column="testcase_expect_data" jdbcType="LONGVARCHAR" property="expectData"/>
+            <result column="testcase_weight" jdbcType="DOUBLE" property="weight"/>
+            <result column="testcase_created_date" jdbcType="TIMESTAMP" property="createdDate"/>
+            <result column="testcase_updated_date" jdbcType="TIMESTAMP" property="updatedDate"/>
+        </association>
+    </resultMap>
+
+    <resultMap id="ResultMapWithExecution" type="com.ifchange.regressiontest.model.TestcaseExecutionResults"
+               extends="ResultMapWithBLOBs">
+        <association property="testExecutionsInfo" column="test_execution_id"
+                     javaType="com.ifchange.regressiontest.model.TestExecutionsInfo">
+            <id column="exec_id" jdbcType="INTEGER" property="id"/>
+            <result column="exec_name" jdbcType="VARCHAR" property="name"/>
+            <result column="exec_desc" jdbcType="VARCHAR" property="desc"/>
+            <result column="exec_test_dataset_id" jdbcType="INTEGER" property="testDatasetId"/>
+            <result column="exec_testcase_count" jdbcType="INTEGER" property="testcaseCount"/>
+            <result column="exec_finished_testcase_count" jdbcType="INTEGER" property="finishedTestcaseCount"/>
+            <result column="exec_test_execution_status" jdbcType="VARCHAR" property="testExecutionStatus"/>
+            <result column="exec_passed_testcase_count" jdbcType="INTEGER" property="passedTestcaseCount"/>
+            <result column="exec_correctness_score" jdbcType="DOUBLE" property="correctnessScore"/>
+            <result column="exec_adjusted_correctness_score" jdbcType="DOUBLE" property="adjustedCorrectnessScore"/>
+            <result column="exec_correctness_distribution" jdbcType="VARCHAR" property="correctnessDistribution"/>
+            <result column="exec_service_address" jdbcType="VARCHAR" property="serviceAddress"/>
+            <result column="exec_created_by" jdbcType="VARCHAR" property="createdBy"/>
+            <result column="exec_created_date" jdbcType="TIMESTAMP" property="createdDate"/>
+            <result column="exec_updated_date" jdbcType="TIMESTAMP" property="updatedDate"/>
+        </association>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, test_execution_id, testcase_id, execution_status, passed, correctness, correctness_score, created_date, updated_date
+    </sql>
+    <sql id="Blob_Column_List">
+        result_data
+    </sql>
+
+    <select id="selectExecutionResultAndExecutionById" parameterType="java.lang.Integer"
+            resultMap="ResultMapWithExecution">
+        select
+        ter.id, ter.test_execution_id, ter.testcase_id, ter.execution_status, ter.passed, ter.correctness, ter.correctness_score, ter.created_date, ter.updated_date, ter.result_data,
+        tei.id as exec_id, tei.name as exec_name, tei.desc as exec_desc, tei.test_dataset_id as exec_test_dataset_id, tei.testcase_count as exec_testcase_count, tei.finished_testcase_count as exec_finished_testcase_count, tei.test_execution_status as exec_test_execution_status,
+        tei.passed_testcase_count as exec_passed_testcase_count, tei.correctness_score as exec_correctness_score, tei.adjusted_correctness_score as exec_adjusted_correctness_score, tei.correctness_distribution as exec_correctness_distribution,
+        tei.service_address as exec_service_address, tei.created_by as exec_created_by, tei.created_date as exec_created_date, tei.updated_date as exec_updated_date
+        from testcase_execution_results ter left join test_executions_info tei on ter.test_execution_id = tei.id where ter.id=#{id,jdbcType=INTEGER}
+    </select>
+
+    <select id="selectExecutionResultAndTestcaseById" parameterType="java.lang.Integer"
+            resultMap="ResultMapWithTestcase">
+      select
+      ter.id, ter.test_execution_id, ter.testcase_id, ter.execution_status, ter.passed, ter.correctness, ter.correctness_score, ter.created_date, ter.updated_date, ter.result_data,
+      tc.id as testcase_id, tc.dataset_id as testcase_dataset_id, tc.data as testcase_data, tc.expect_data as testcase_expect_data, tc.weight as testcase_weight, tc.created_date as testcase_created_date, tc.updated_date as testcase_updated_date
+      from testcase_execution_results ter left join testcases tc on ter.testcase_id = tc.id where ter.id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <select id="selectExecutionResultAndExecutionAndTestcaseSelective"
+            parameterType="com.ifchange.regressiontest.model.TestcaseExecutionResults"
+            resultMap="ResultMapWithExecution">
+        select
+        ter.id, ter.test_execution_id, ter.testcase_id, ter.execution_status, ter.passed, ter.correctness,
+        ter.correctness_score, ter.created_date, ter.updated_date, ter.result_data,
+        tei.id as exec_id, tei.name as exec_name, tei.desc as exec_desc, tei.test_dataset_id as exec_test_dataset_id,
+        tei.testcase_count as exec_testcase_count, tei.finished_testcase_count as exec_finished_testcase_count,
+        tei.test_execution_status as exec_test_execution_status,
+        tei.passed_testcase_count as exec_passed_testcase_count, tei.correctness_score as exec_correctness_score,
+        tei.adjusted_correctness_score as exec_adjusted_correctness_score, tei.correctness_distribution as
+        exec_correctness_distribution,
+        tei.service_address as exec_service_address, tei.created_by as exec_created_by, tei.created_date as
+        exec_created_date, tei.updated_date as exec_updated_date,
+        tc.id as testcase_id, tc.dataset_id as testcase_dataset_id, tc.data as testcase_data, tc.expect_data as
+        testcase_expect_data, tc.weight as testcase_weight, tc.created_date as testcase_created_date, tc.updated_date as
+        testcase_updated_date
+        from testcase_execution_results ter left join test_executions_info tei on ter.test_execution_id = tei.id left
+        join testcases tc on ter.testcase_id = tc.id
+        <trim prefix="where" prefixOverrides="and|or">
+            <if test="id != null">
+                ter.id = #{id,jdbcType=INTEGER}
+            </if>
+            <if test="testExecutionId != null">
+                and ter.test_execution_id = #{testExecutionId,jdbcType=INTEGER}
+            </if>
+            <if test="testcaseId != null">
+                and ter.testcase_id = #{testcaseId,jdbcType=INTEGER}
+            </if>
+            <if test="executionStatus != null">
+                and ter.execution_status = #{executionStatus,jdbcType=VARCHAR}
+            </if>
+            <if test="passed != null">
+                and ter.passed = #{passed,jdbcType=BIT}
+            </if>
+            <if test="correctness != null">
+                and ter.correctness = #{correctness,jdbcType=VARCHAR}
+            </if>
+            <if test="correctnessScore != null">
+                and ter.correctness_score = #{correctnessScore,jdbcType=DOUBLE}
+            </if>
+            <if test="createdDate != null">
+                and ter.created_date = #{createdDate,jdbcType=TIMESTAMP}
+            </if>
+            <if test="updatedDate != null">
+                and ter.updated_date = #{updatedDate,jdbcType=TIMESTAMP}
+            </if>
+            <if test="resultData != null">
+                and ter.result_data = #{resultData,jdbcType=LONGVARCHAR}
+            </if>
+        </trim>
+        order by ter.id desc
+    </select>
+
+    <select id="selectExecutionResultAndExecutionAndTestcaseById" parameterType="java.lang.Integer"
+            resultMap="ResultMapWithExecution">
+        select
+        ter.id, ter.test_execution_id, ter.testcase_id, ter.execution_status, ter.passed, ter.correctness,
+        ter.correctness_score, ter.created_date, ter.updated_date, ter.result_data,
+        tei.id as exec_id, tei.name as exec_name, tei.desc as exec_desc, tei.test_dataset_id as exec_test_dataset_id,
+        tei.testcase_count as exec_testcase_count, tei.finished_testcase_count as exec_finished_testcase_count,
+        tei.test_execution_status as exec_test_execution_status,
+        tei.passed_testcase_count as exec_passed_testcase_count, tei.correctness_score as exec_correctness_score,
+        tei.adjusted_correctness_score as exec_adjusted_correctness_score, tei.correctness_distribution as
+        exec_correctness_distribution,
+        tei.service_address as exec_service_address, tei.created_by as exec_created_by, tei.created_date as
+        exec_created_date, tei.updated_date as exec_updated_date,
+        tc.id as testcase_id, tc.dataset_id as testcase_dataset_id, tc.data as testcase_data, tc.expect_data as
+        testcase_expect_data, tc.weight as testcase_weight, tc.created_date as testcase_created_date, tc.updated_date as
+        testcase_updated_date
+        from testcase_execution_results ter left join test_executions_info tei on ter.test_execution_id = tei.id left
+        join testcases tc on ter.testcase_id = tc.id
+        where ter.id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="ResultMapWithBLOBs">
+        select
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        from testcase_execution_results
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <select id="selectSelective" parameterType="com.ifchange.regressiontest.model.TestcaseExecutionResults"
+            resultMap="ResultMapWithBLOBs">
+        select
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        from testcase_execution_results
+        <trim prefix="where" prefixOverrides="and|or">
+            <if test="id != null">
+                id = #{id,jdbcType=INTEGER}
+            </if>
+            <if test="testExecutionId != null">
+                and test_execution_id = #{testExecutionId,jdbcType=INTEGER}
+            </if>
+            <if test="testcaseId != null">
+                and testcase_id = #{testcaseId,jdbcType=INTEGER}
+            </if>
+            <if test="executionStatus != null">
+                and execution_status = #{executionStatus,jdbcType=VARCHAR}
+            </if>
+            <if test="passed != null">
+                and passed = #{passed,jdbcType=BIT}
+            </if>
+            <if test="correctness != null">
+                and correctness = #{correctness,jdbcType=VARCHAR}
+            </if>
+            <if test="correctnessScore != null">
+                and correctness_score = #{correctnessScore,jdbcType=DOUBLE}
+            </if>
+            <if test="createdDate != null">
+                and created_date = #{createdDate,jdbcType=TIMESTAMP}
+            </if>
+            <if test="updatedDate != null">
+                and updated_date = #{updatedDate,jdbcType=TIMESTAMP}
+            </if>
+            <if test="resultData != null">
+                and result_data = #{resultData,jdbcType=LONGVARCHAR}
+            </if>
+        </trim>
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete from testcase_execution_results
+        where id = #{id,jdbcType=INTEGER}
+      </delete>
+    <insert id="insert" parameterType="com.ifchange.regressiontest.model.TestcaseExecutionResults">
+        insert into testcase_execution_results (id, test_execution_id, testcase_id, 
+          execution_status, passed, correctness, 
+          correctness_score, created_date,
+          result_data)
+        values (#{id,jdbcType=INTEGER}, #{testExecutionId,jdbcType=INTEGER}, #{testcaseId,jdbcType=INTEGER}, 
+          #{executionStatus,jdbcType=VARCHAR}, #{passed,jdbcType=BIT}, #{correctness,jdbcType=VARCHAR},
+          #{correctnessScore,jdbcType=DOUBLE}, now(),
+          #{resultData,jdbcType=LONGVARCHAR})
+      </insert>
+    <insert id="insertSelective" parameterType="com.ifchange.regressiontest.model.TestcaseExecutionResults">
+        insert into testcase_execution_results
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="testExecutionId != null">
+                test_execution_id,
+            </if>
+            <if test="testcaseId != null">
+                testcase_id,
+            </if>
+            <if test="executionStatus != null">
+                execution_status,
+            </if>
+            <if test="passed != null">
+                passed,
+            </if>
+            <if test="correctness != null">
+                correctness,
+            </if>
+            <if test="correctnessScore != null">
+                correctness_score,
+            </if>
+            created_date,
+            <if test="resultData != null">
+                result_data,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="testExecutionId != null">
+                #{testExecutionId,jdbcType=INTEGER},
+            </if>
+            <if test="testcaseId != null">
+                #{testcaseId,jdbcType=INTEGER},
+            </if>
+            <if test="executionStatus != null">
+                #{executionStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="passed != null">
+                #{passed,jdbcType=BIT},
+            </if>
+            <if test="correctness != null">
+                #{correctness,jdbcType=VARCHAR},
+            </if>
+            <if test="correctnessScore != null">
+                #{correctnessScore,jdbcType=DOUBLE},
+            </if>
+            now(),
+            <if test="resultData != null">
+                #{resultData,jdbcType=LONGVARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.ifchange.regressiontest.model.TestcaseExecutionResults">
+        update testcase_execution_results
+        <set>
+            <if test="testExecutionId != null">
+                test_execution_id = #{testExecutionId,jdbcType=INTEGER},
+            </if>
+            <if test="testcaseId != null">
+                testcase_id = #{testcaseId,jdbcType=INTEGER},
+            </if>
+            <if test="executionStatus != null">
+                execution_status = #{executionStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="passed != null">
+                passed = #{passed,jdbcType=BIT},
+            </if>
+            <if test="correctness != null">
+                correctness = #{correctness,jdbcType=VARCHAR},
+            </if>
+            <if test="correctnessScore != null">
+                correctness_score = #{correctnessScore,jdbcType=DOUBLE},
+            </if>
+            updated_date = now(),
+            <if test="resultData != null">
+                result_data = #{resultData,jdbcType=LONGVARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.ifchange.regressiontest.model.TestcaseExecutionResults">
+        update testcase_execution_results
+        set test_execution_id = #{testExecutionId,jdbcType=INTEGER},
+          testcase_id = #{testcaseId,jdbcType=INTEGER},
+          execution_status = #{executionStatus,jdbcType=VARCHAR},
+          passed = #{passed,jdbcType=BIT},
+          correctness = #{correctness,jdbcType=VARCHAR},
+          correctness_score = #{correctnessScore,jdbcType=DOUBLE},
+          updated_date = now(),
+          result_data = #{resultData,jdbcType=LONGVARCHAR}
+        where id = #{id,jdbcType=INTEGER}
+      </update>
+</mapper>

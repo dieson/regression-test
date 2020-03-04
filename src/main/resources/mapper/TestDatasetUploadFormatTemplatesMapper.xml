@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ifchange.regressiontest.dao.TestDatasetUploadFormatTemplatesMapper">
+    <resultMap id="BaseResultMap" type="com.ifchange.regressiontest.model.TestDatasetUploadFormatTemplates">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="dataset_type_id" jdbcType="INTEGER" property="datasetTypeId"/>
+        <result column="request_colum_name" jdbcType="VARCHAR" property="requestColumName"/>
+        <result column="request_colum_data_type" jdbcType="VARCHAR" property="requestColumDataType"/>
+        <result column="response_colum_name" jdbcType="VARCHAR" property="responseColumName"/>
+        <result column="response_colum_data_type" jdbcType="VARCHAR" property="responseColumDataType"/>
+        <result column="created_date" jdbcType="TIMESTAMP" property="createdDate"/>
+        <result column="updated_date" jdbcType="TIMESTAMP" property="updatedDate"/>
+        <association property="testDatasetTypesInfo" column="dataset_type_id"
+                     javaType="com.ifchange.regressiontest.model.TestDatasetTypesInfo">
+            <id column="type_id" jdbcType="INTEGER" property="id"/>
+            <result column="type_name" jdbcType="VARCHAR" property="name"/>
+            <result column="type_desc" jdbcType="VARCHAR" property="desc"/>
+            <result column="type_default_service_address" jdbcType="VARCHAR" property="defaultServiceAddress"/>
+            <result column="type_created_by" jdbcType="VARCHAR" property="createdBy"/>
+            <result column="type_created_date" jdbcType="TIMESTAMP" property="createdDate"/>
+            <result column="type_updated_date" jdbcType="TIMESTAMP" property="updatedDate"/>
+        </association>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, dataset_type_id, request_colum_name, request_colum_data_type,response_colum_name,response_colum_data_type, created_date, updated_date
+  </sql>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from test_dataset_upload_format_templates
+    </select>
+
+    <select id="selectByTypeId" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from test_dataset_upload_format_templates where dataset_type_id = #{datasetTypeId,jdbcType=INTEGER}
+    </select>
+
+    <select id="selectUploadTemplatesAndTypeByTemplatesId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        tduft.id, tduft.dataset_type_id, tduft.request_colum_name,tduft.request_colum_data_type,tduft.response_colum_name,tduft.response_colum_data_type, tduft.created_date, tduft.updated_date,
+        tdti.id as type_id, tdti.`name` as type_name, tdti.`desc` as type_desc, tdti.default_service_address as type_default_service_address, tdti.created_by as type_created_by, tdti.created_date as type_created_date, tdti.updated_date as type_updated_date
+        from test_dataset_upload_format_templates tduft left join test_dataset_types_info tdti on tduft.dataset_type_id = tdti.id where tduft.id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <select id="selectUploadTemplatesAndTypeSelective"
+            parameterType="com.ifchange.regressiontest.model.TestDatasetUploadFormatTemplates"
+            resultMap="BaseResultMap">
+        select
+        tduft.id, tduft.dataset_type_id,
+        tduft.request_colum_name,tduft.request_colum_data_type,tduft.response_colum_name,tduft.response_colum_data_type,
+        tduft.created_date, tduft.updated_date,
+        tdti.id as type_id, tdti.`name` as type_name, tdti.`desc` as type_desc, tdti.default_service_address as
+        type_default_service_address, tdti.created_by as type_created_by, tdti.created_date as type_created_date,
+        tdti.updated_date as type_updated_date
+        from test_dataset_upload_format_templates tduft left join test_dataset_types_info tdti on tduft.dataset_type_id
+        = tdti.id
+        <trim prefix="where" prefixOverrides="and|or">
+            <if test="id != null">
+                and tduft.id = #{id, jdbcType=INTEGER}
+            </if>
+            <if test="datasetTypeId != null">
+                and tduft.dataset_type_id = #{datasetTypeId, jdbcType=INTEGER}
+            </if>
+            <if test="requestColumName != null">
+                and tduft.request_colum_name = #{requestColumName, jdbcType=VARCHAR}
+            </if>
+            <if test="requestColumDataType != null">
+                and tduft.request_colum_data_type = #{requestColumDataType, jdbcType=VARCHAR}
+            </if>
+            <if test="responseColumName != null">
+                and tduft.response_colum_name = #{responseColumName, jdbcType=VARCHAR}
+            </if>
+            <if test="responseColumDataType != null">
+                and tduft.response_colum_data_type = #{responseColumDataType, jdbcType=VARCHAR}
+            </if>
+            <if test="createdDate != null">
+                and tduft.created_date = #{createdDate, jdbcType=TIMESTAMP}
+            </if>
+            <if test="updatedDate != null">
+                and tduft.updated_date = #{updatedDate, jdbcType=TIMESTAMP}
+            </if>
+        </trim>
+    </select>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from test_dataset_upload_format_templates
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <select id="selectByPrimaryKeyList" parameterType="java.util.List" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from test_dataset_upload_format_templates
+        where id in
+        <foreach collection="list" index="index" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="selectSelective" parameterType="com.ifchange.regressiontest.model.TestDatasetUploadFormatTemplates"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from test_dataset_upload_format_templates
+        <trim prefix="where" prefixOverrides="and|or">
+            <if test="id != null">
+                id = #{id, jdbcType=INTEGER}
+            </if>
+            <if test="datasetTypeId != null">
+                and dataset_type_id = #{datasetTypeId, jdbcType=INTEGER}
+            </if>
+            <if test="requestColumName != null">
+                and request_colum_name = #{requestColumName, jdbcType=VARCHAR}
+            </if>
+            <if test="requestColumDataType != null">
+                and request_colum_data_type = #{requestColumDataType, jdbcType=VARCHAR}
+            </if>
+            <if test="responseColumName != null">
+                and response_colum_name = #{responseColumName, jdbcType=VARCHAR}
+            </if>
+            <if test="responseColumDataType != null">
+                and response_colum_data_type = #{responseColumDataType, jdbcType=VARCHAR}
+            </if>
+            <if test="createdDate != null">
+                and created_date = #{createdDate, jdbcType=TIMESTAMP}
+            </if>
+            <if test="updatedDate != null">
+                and updated_date = #{updatedDate, jdbcType=TIMESTAMP}
+            </if>
+        </trim>
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from test_dataset_upload_format_templates
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+    <delete id="deleteByPrimaryKeyList" parameterType="java.util.List">
+        delete from test_dataset_upload_format_templates
+        where id in
+        <foreach collection="list" index="index" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <insert id="insert" parameterType="com.ifchange.regressiontest.model.TestDatasetUploadFormatTemplates">
+    insert into test_dataset_upload_format_templates (id, dataset_type_id, request_colum_name, request_colum_data_type,response_colum_name,response_colum_data_type,
+      created_date
+      )
+    values (#{id,jdbcType=INTEGER}, #{datasetTypeId,jdbcType=INTEGER}, #{requestColumName, jdbcType=VARCHAR},#{requestColumDataType, jdbcType=VARCHAR}, #{responseColumName, jdbcType=VARCHAR},#{responseColumDataType, jdbcType=VARCHAR}
+      now()
+      )
+  </insert>
+    <insert id="insertSelective" parameterType="com.ifchange.regressiontest.model.TestDatasetUploadFormatTemplates">
+        insert into test_dataset_upload_format_templates
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="datasetTypeId != null">
+                dataset_type_id,
+            </if>
+            <if test="requestColumName != null">
+                request_colum_name,
+            </if>
+            <if test="requestColumDataType != null">
+                request_colum_data_type,
+            </if>
+            <if test="responseColumName != null">
+                response_colum_name,
+            </if>
+            <if test="responseColumDataType != null">
+                response_colum_data_type,
+            </if>
+            created_date
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="datasetTypeId != null">
+                #{datasetTypeId,jdbcType=INTEGER},
+            </if>
+            <if test="requestColumName != null">
+                #{requestColumName, jdbcType=VARCHAR},
+            </if>
+            <if test="requestColumDataType != null">
+                #{requestColumDataType, jdbcType=VARCHAR},
+            </if>
+            <if test="responseColumName != null">
+                #{responseColumName, jdbcType=VARCHAR},
+            </if>
+            <if test="responseColumDataType != null">
+                #{responseColumDataType, jdbcType=VARCHAR},
+            </if>
+            now()
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective"
+            parameterType="com.ifchange.regressiontest.model.TestDatasetUploadFormatTemplates">
+        update test_dataset_upload_format_templates
+        <set>
+            <if test="datasetTypeId != null">
+                dataset_type_id = #{datasetTypeId,jdbcType=INTEGER},
+            </if>
+            <if test="requestColumName != null">
+                request_colum_name = #{requestColumName, jdbcType=VARCHAR},
+            </if>
+            <if test="requestColumDataType != null">
+                request_colum_data_type = #{requestColumDataType, jdbcType=VARCHAR},
+            </if>
+            <if test="responseColumName != null">
+                response_colum_name = #{responseColumName, jdbcType=VARCHAR},
+            </if>
+            <if test="responseColumDataType != null">
+                response_colum_data_type = #{responseColumDataType, jdbcType=VARCHAR},
+            </if>
+            updated_date = now()
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.ifchange.regressiontest.model.TestDatasetUploadFormatTemplates">
+    update test_dataset_upload_format_templates
+    set dataset_type_id = #{datasetTypeId,jdbcType=INTEGER},
+      request_colum_name = #{requestColumName, jdbcType=VARCHAR},
+      request_colum_data_type = #{requestColumDataType, jdbcType=VARCHAR},
+      response_colum_name = #{responseColumName, jdbcType=VARCHAR},
+      response_colum_data_type = #{responseColumDataType, jdbcType=VARCHAR},
+      colum_data_type = #{columDataType,jdbcType=VARCHAR},
+      updated_date = now()
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

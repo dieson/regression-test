@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ifchange.regressiontest.dao.TestcaseServiceInputTemplatesMapper">
+    <resultMap id="BaseResultMap" type="com.ifchange.regressiontest.model.TestcaseServiceInputTemplates">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="dataset_type_id" jdbcType="INTEGER" property="datasetTypeId"/>
+        <result column="request_template" jdbcType="VARCHAR" property="requestTemplate"/>
+        <result column="response_template" jdbcType="VARCHAR" property="responseTemplate"/>
+        <result column="created_date" jdbcType="TIMESTAMP" property="createdDate"/>
+        <result column="updated_date" jdbcType="TIMESTAMP" property="updatedDate"/>
+        <association property="testDatasetTypesInfo" column="dataset_type_id"
+                     javaType="com.ifchange.regressiontest.model.TestDatasetTypesInfo">
+            <id column="type_id" jdbcType="INTEGER" property="id"/>
+            <result column="type_name" jdbcType="VARCHAR" property="name"/>
+            <result column="type_desc" jdbcType="VARCHAR" property="desc"/>
+            <result column="type_default_service_address" jdbcType="VARCHAR" property="defaultServiceAddress"/>
+            <result column="type_created_by" jdbcType="VARCHAR" property="createdBy"/>
+            <result column="type_created_date" jdbcType="TIMESTAMP" property="createdDate"/>
+            <result column="type_updated_date" jdbcType="TIMESTAMP" property="updatedDate"/>
+        </association>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, dataset_type_id, request_template, response_template, created_date, updated_date
+  </sql>
+
+    <select id="selectTemplatesAndTypeByTemplateId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+      select
+      tsit.id, tsit.dataset_type_id, tsit.request_template, tsit.response_template, tsit.created_date, tsit.updated_date,
+      tdti.id as type_id, tdti.`name` as type_name, tdti.`desc` as type_desc, tdti.default_service_address as type_default_service_address, tdti.created_by as type_created_by, tdti.created_date as type_created_date, tdti.updated_date as type_updated_date
+      from testcase_service_input_templates tsit left join test_dataset_types_info tdti on tsit.dataset_type_id = tdti.id where tsit.id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <select id="selectTemplatesAndTypeSelective"
+            parameterType="com.ifchange.regressiontest.model.TestcaseServiceInputTemplates"
+            resultMap="BaseResultMap">
+        select
+        tsit.id, tsit.dataset_type_id, tsit.request_template, tsit.response_template, tsit.created_date,
+        tsit.updated_date,
+        tdti.id as type_id, tdti.`name` as type_name, tdti.`desc` as type_desc, tdti.default_service_address as
+        type_default_service_address, tdti.created_by as type_created_by, tdti.created_date as type_created_date,
+        tdti.updated_date as type_updated_date
+        from testcase_service_input_templates tsit left join test_dataset_types_info tdti on tsit.dataset_type_id =
+        tdti.id
+        <trim prefix="where" prefixOverrides="and|or">
+            <if test="id != null">
+                and tsit.id = #{id,jdbcType=INTEGER}
+            </if>
+            <if test="datasetTypeId != null">
+                and tsit.dataset_type_id = #{datasetTypeId,jdbcType=INTEGER}
+            </if>
+            <if test="requestTemplate != null">
+                and tsit.request_template = #{requestTemplate,jdbcType=VARCHAR}
+            </if>
+            <if test="responseTemplate != null">
+                and tsit.response_template = #{responseTemplate,jdbcType=VARCHAR}
+            </if>
+            <if test="createdDate != null">
+                and tsit.created_date = #{createdDate,jdbcType=TIMESTAMP}
+            </if>
+            <if test="updatedDate != null">
+                and tsit.updated_date = #{updatedDate,jdbcType=TIMESTAMP}
+            </if>
+        </trim>
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from testcase_service_input_templates
+    </select>
+
+    <select id="selectByDataSetTypeId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from testcase_service_input_templates
+        where dataset_type_id = #{datasetTypeId, jdbcType=INTEGER}
+    </select>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from testcase_service_input_templates
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <select id="selectByPrimaryKeyList" parameterType="java.util.List" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from testcase_service_input_templates
+        where id in
+        <foreach collection="list" index="index" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="selectSelective" parameterType="com.ifchange.regressiontest.model.TestcaseServiceInputTemplates"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from testcase_service_input_templates
+        <trim prefix="where" prefixOverrides="and|or">
+            <if test="id != null">
+                id = #{id,jdbcType=INTEGER}
+            </if>
+            <if test="datasetTypeId != null">
+                and dataset_type_id = #{datasetTypeId,jdbcType=INTEGER}
+            </if>
+            <if test="requestTemplate != null">
+                and request_template = #{requestTemplate,jdbcType=VARCHAR}
+            </if>
+            <if test="responseTemplate != null">
+                and response_template = #{responseTemplate,jdbcType=VARCHAR}
+            </if>
+            <if test="createdDate != null">
+                and created_date = #{createdDate,jdbcType=TIMESTAMP}
+            </if>
+            <if test="updatedDate != null">
+                and updated_date = #{updatedDate,jdbcType=TIMESTAMP}
+            </if>
+        </trim>
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete from testcase_service_input_templates
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+
+    <delete id="deleteByPrimaryKeyList" parameterType="java.util.List">
+        delete from testcase_service_input_templates
+        where id in
+        <foreach collection="list" index="index" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <insert id="insert" parameterType="com.ifchange.regressiontest.model.TestcaseServiceInputTemplates">
+    insert into testcase_service_input_templates (id, dataset_type_id, request_template, response_template,
+      created_date)
+    values (#{id,jdbcType=INTEGER}, #{datasetTypeId,jdbcType=INTEGER}, #{requestTemplate,jdbcType=VARCHAR}, #{responseTemplate,jdbcType=VARCHAR},
+      now())
+  </insert>
+    <insert id="insertSelective" parameterType="com.ifchange.regressiontest.model.TestcaseServiceInputTemplates">
+        insert into testcase_service_input_templates
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="datasetTypeId != null">
+                dataset_type_id,
+            </if>
+            <if test="requestTemplate != null">
+                request_template,
+            </if>
+            <if test="responseTemplate != null">
+                response_template,
+            </if>
+            created_date
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="datasetTypeId != null">
+                #{datasetTypeId,jdbcType=INTEGER},
+            </if>
+            <if test="requestTemplate != null">
+                #{requestTemplate,jdbcType=VARCHAR},
+            </if>
+            <if test="responseTemplate != null">
+                #{responseTemplate,jdbcType=VARCHAR},
+            </if>
+            now()
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective"
+            parameterType="com.ifchange.regressiontest.model.TestcaseServiceInputTemplates">
+        update testcase_service_input_templates
+        <set>
+            <if test="datasetTypeId != null">
+                dataset_type_id = #{datasetTypeId,jdbcType=INTEGER},
+            </if>
+            <if test="requestTemplate != null">
+                request_template = #{requestTemplate,jdbcType=VARCHAR},
+            </if>
+            <if test="responseTemplate != null">
+                response_template = #{responseTemplate,jdbcType=VARCHAR},
+            </if>
+            <if test="updatedDate != null">
+                updated_date = now(),
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.ifchange.regressiontest.model.TestcaseServiceInputTemplates">
+    update testcase_service_input_templates
+    set dataset_type_id = #{datasetTypeId,jdbcType=INTEGER},
+      request_template = #{requestTemplate,jdbcType=VARCHAR},
+      response_template = #{responseTemplate,jdbcType=VARCHAR},
+      updated_date = now()
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
